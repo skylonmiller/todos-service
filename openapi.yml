@@ -1,0 +1,398 @@
+openapi: "3.0.0"
+info:
+  version: v0
+  title: Petstore Service
+  license:
+    name: MIT
+servers:
+  # https://api.36node.com{basePath} weipeng
+  - url: https://localhost:9527/{basePath}
+    description: The production API server
+    variables:
+      basePath:
+        default: /petstore/v0
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pet
+      parameters:
+        - name: _limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+            maximum: 1000
+        - name: _offset
+          in: query
+          description: How many items to escape
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: _sort
+          in: query
+          description: Fields to sort
+          required: false
+          schema:
+            type: string
+        - name: _select
+          in: query
+          description: Fields to select
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: tag
+          in: query
+          description: Tag of pet
+          required: false
+          schema:
+            type: string
+        - name: age_gt
+          in: query
+          description: Return Pet older than given age
+          required: false
+          schema:
+            type: integer
+        - name: birthAt_gt
+          in: query
+          description: Return Pet after than given birthAt
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: birthAt_lt
+          in: query
+          description: Return Pet before than given birthAt
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: grade_gt
+          in: query
+          description: Return Pet grade great than given grade
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: grade_lt
+          in: query
+          description: Return Pet grade little than given grade
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: A paged array of pets
+          headers:
+            X-Total-Count:
+              description: Total count of all warnings match the query
+              required: true
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "id": 1,
+                        "name": "aa",
+                        "tag": "red",
+                        "age": 3,
+                        "grade": 5,
+                      },
+                      {
+                        "id": 2,
+                        "name": "bb",
+                        "tag": "happy",
+                        "age": 5
+                        "grade": 4,
+                      },
+                      {
+                        "id": 3,
+                        "name": "cc",
+                        "tag": "husky",
+                        "age": 6,
+                        "grade": 3,
+                      }
+                    ]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      summary: Create a pet
+      operationId: createPet
+      tags:
+        - pet
+      requestBody:
+        description: Pet to add to the store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetCreateDoc"
+            examples:
+              default:
+                value: |
+                  {
+                    "name": "dd",
+                    "tag": "red",
+                    "age": 5,
+                    "grade": 3,
+                  }
+      responses:
+        "201":
+          description: The Pet created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+              examples:
+                default:
+                  value: |
+                    {
+                      "id": 4,
+                      "name": "dd",
+                      "tag": "red",
+                      "age": 5,
+                      "grade": 3,
+                    }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /pets/{petId}:
+    get:
+      summary: Find pet by id
+      operationId: showPetById
+      tags:
+        - pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+            pattern: "[a-f\\d]{24}"
+      responses:
+        "200":
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+              examples:
+                default:
+                  value: |
+                    {
+                      "id": 3,
+                      "name": "cc",
+                      "tag": "red",
+                      "age": 6,
+                      "grade": 3
+                    }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    put:
+      summary: Update pet
+      operationId: updatePet
+      tags:
+        - pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of pet
+          schema:
+            type: string
+            pattern: "[a-f\\d]{24}"
+      requestBody:
+        description: Pet to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetDoc"
+      responses:
+        "200":
+          description: The pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    delete:
+      description: deletes a single pet based on the ID supplied
+      operationId: deletePet
+      tags:
+        - pet
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to delete
+          required: true
+          schema:
+            type: string
+            pattern: "[a-f\\d]{24}"
+      responses:
+        "204":
+          description: pet deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+security:
+  - bearerAuth: []
+
+components:
+  responses:
+    NoContent:
+      description: The resource was deleted successfully.
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Err"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Err"
+    InternalError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Err"
+
+  schemas:
+    PetDoc:
+      type: object
+      properties:
+        name:
+          type: string
+          description: pet's name
+        tag:
+          type: string
+          enum: ["DOG", "CAT"]
+        age:
+          type: integer
+          format: int32
+        birthAt:
+          type: string
+          format: date
+          nullable: true
+        grade:
+          type: integer
+          format: int32
+        owner:
+          type: string
+        other1:
+          type: string
+          readOnly: true
+        other2:
+          type: string
+          writeOnly: true
+
+    PetCreateDoc:
+      allOf:
+        - $ref: "#/components/schemas/PetDoc"
+        - type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: pet's name
+
+    Pet:
+      allOf:
+        - $ref: "#/components/schemas/PetDoc"
+        - $ref: "#/components/schemas/MongoDefault"
+
+    MongoDefault:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        updateAt:
+          type: string
+          format: date-time
+        updateBy:
+          type: string
+        createAt:
+          type: string
+          format: date-time
+        createBy:
+          type: string
+
+    Err:
+      type: object
+      required:
+        - name
+        - message
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+        message:
+          type: boolean
+        name:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              keyword:
+                type: string
+              message:
+                type: string
+              path:
+                type: string
+              value:
+                type: string
+
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

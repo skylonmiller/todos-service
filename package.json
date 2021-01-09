@@ -1,0 +1,113 @@
+{
+  "name": "todos-service",
+  "version": "0.0.0",
+  "description": "A service boilerplate with openapi,rest and mongodb.",
+  "repository": {
+    "url": "skylonmiller/todos-service",
+    "type": "git"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "template": "service",
+  "files": [
+    "bin",
+    "dist",
+    "mock",
+    "typings"
+  ],
+  "config-overrides-path": "node_modules/@36node/sketch/config-overrides",
+  "main": "dist/index.js",
+  "typings": "typings/index.d.ts",
+  "scripts": {
+    "format": "prettier --trailing-comma es5 --write 'src/**/*.js'",
+    "gen:api": "swagen koa openapi.yml ./src/api && npm run format",
+    "gen:postman": "swagen postman openapi.yml postman.json",
+    "lint": "sketch lint src",
+    "release": "standard-version",
+    "server": "node --harmony -r esm bin/server.js",
+    "start": "sketch start",
+    "sync": "node --harmony -r esm bin/sync.js",
+    "test": "sketch test",
+    "test:int": "sketch test --config test/jest.config.js"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e $GIT_PARAMS",
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run lint && CI=true npm run test"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "npm run format",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "@36node/eslint-config": "^0.6.4",
+    "@36node/sketch": "^0.15.3",
+    "@36node/swagen": "^0.18.2",
+    "@commitlint/cli": "^6.1.0",
+    "@commitlint/config-conventional": "^6.1.0",
+    "@shelf/jest-mongodb": "^1.0.1",
+    "@types/jest": "^24.0.12",
+    "@types/koa": "^2.0.46",
+    "@types/lodash": "^4.14.116",
+    "@types/mongoose": "^5.2.19",
+    "husky": "^1.3.1",
+    "jest-runner-newman": "^1.0.5",
+    "lint-staged": "^8.1.5",
+    "newman": "^4.4.1",
+    "pino-pretty": "^3.2.0",
+    "prettier": "^1.18.2",
+    "standard-version": "^6.0.1"
+  },
+  "dependencies": {
+    "@36node/koa-health": "^0.1.3",
+    "@36node/koa-openapi": "^0.1.7",
+    "@36node/mongoose-helper": "^0.4.6",
+    "@36node/query-normalizr": "^0.5.0",
+    "@koa/cors": "^3.0.0",
+    "ajv": "^6.12.2",
+    "debug": "^4.1.1",
+    "dotenv": "^7.0.0",
+    "esm": "^3.2.25",
+    "koa": "^2.7.0",
+    "koa-body": "^4.1.0",
+    "koa-compress": "^3.0.0",
+    "koa-helmet": "^4.1.0",
+    "koa-jwt": "^4.0.0",
+    "koa-logger": "^3.2.0",
+    "koa-pino-logger": "^2.1.3",
+    "koa-tree-router": "^0.4.5",
+    "lodash": "^4.17.10",
+    "mem": "^8.0.0",
+    "mongoose": "^5.4.19",
+    "pino": "^5.11.1"
+  },
+  "jest": {
+    "displayName": "unit",
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
+    ],
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "preset": "@shelf/jest-mongodb"
+  },
+  "babel": {
+    "presets": [
+      "react-app"
+    ]
+  },
+  "gitHead": "e71999c427c791c202a32a8cd163627c62c308b3"
+}
